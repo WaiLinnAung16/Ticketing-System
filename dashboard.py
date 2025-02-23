@@ -112,8 +112,8 @@ def open_edit_modal(edit_data, index):
         """
         zone_error = None
         station_error = None
-        edit_zone_value = zone_entry.get()
-        edit_station_value = stations_entry.get()
+        edit_zone_value = zone_entry.get().strip()
+        edit_station_value = stations_entry.get().strip()
 
         # Clear previous error messages if they exist
         if zone_error:
@@ -200,21 +200,21 @@ def open_create_modal():
     zone_label.grid(row=0, column=0, sticky='w', padx=5, pady=(5, 2))
 
     zone_entry = ctk.CTkEntry(frame, placeholder_text='Enter Zone', width=200)
-    zone_entry.grid(row=1, column=0, padx=5, pady=(0, 10))
+    zone_entry.grid(row=1, column=0,  sticky='w', pady=(5, 2))
 
     # Station Names Entry
     station_label = ctk.CTkLabel(frame, text="Stations:")
-    station_label.grid(row=2, column=0, sticky='w', padx=5, pady=(5, 2))
+    station_label.grid(row=3, column=0, sticky='w', padx=5, pady=(5, 2))
 
     stations_entry = ctk.CTkEntry(frame, placeholder_text='Enter Stations', width=200)
-    stations_entry.grid(row=3, column=0, padx=5, pady=(0, 10))
+    stations_entry.grid(row=4, column=0, sticky='w', pady=(5, 2))
 
     # Error Message Labels (Initially Empty)
     zone_error_label = ctk.CTkLabel(frame, text="", text_color="red")
-    zone_error_label.grid(row=1, column=1, padx=5, pady=(0, 10))
+    zone_error_label.grid(row=2, column=0, padx=5, pady=(5, 2))
 
     station_error_label = ctk.CTkLabel(frame, text="", text_color="red")
-    station_error_label.grid(row=3, column=1, padx=5, pady=(0, 10))
+    station_error_label.grid(row=5, column=0, padx=5, pady=(5, 2))
 
     def create():
         """
@@ -266,7 +266,7 @@ def open_create_modal():
 
     # Button Section
     button_frame = ctk.CTkFrame(frame)
-    button_frame.grid(row=5, column=0, columnspan=2, pady=10)
+    button_frame.grid(row=6, column=0, columnspan=2, pady=10)
 
     cancel_button = ctk.CTkButton(button_frame, text='Cancel', command=cancel, width=150)
     cancel_button.pack(side="left", padx=5)
@@ -284,10 +284,10 @@ def open_main_window(screen_w, screen_h):
     main_app.geometry(f'{screen_w}x{screen_h}+300+100')
 
     welcome_label = ctk.CTkLabel(main_app, text="Welcome to the Centrala Ticketing System!", font=("Arial", 20))
-    welcome_label.grid(row=1, column=4)
+    welcome_label.place(relx=0.5,rely=0.1, anchor='center')
 
     logout_button = ctk.CTkButton(main_app, text="Logout", command=main_app.destroy, width=150, fg_color='red')
-    logout_button.grid(row=2,column=1)
+    logout_button.grid(row=1, column=0, padx=20, pady=20, sticky="w")
 
     tabview = ctk.CTkTabview(master=main_app, width=1080, height=300)
     tabview.place(relx=0.5, rely=0.5, anchor='center')
@@ -436,20 +436,20 @@ def open_main_window(screen_w, screen_h):
             no_child = int(no_child)
             no_senior = int(no_senior)
             no_students = int(no_students)
-
+            # Check if at least one person is entered 
             if no_adults == 0 and no_child == 0 and no_senior == 0 and no_students == 0:
                 raise Exception('At least one person is required to create voucher!')
-            
         except ValueError:
-            validation_error = ctk.CTkLabel(master=tabview.tab('Ticket'), text='Please check all input valid integers or 0.', text_color='red')
+            # Handle invalid integer input
+            validation_error = ctk.CTkLabel(master=tabview.tab('Ticket'), text='Please enter valid integers (or 0) for all inputs.', text_color='red')
             validation_error.pack()
             return
-        
         except Exception as err:
+            # Handle general exceptions (like no people being entered)
             validation_error = ctk.CTkLabel(master=tabview.tab('Ticket'), text=err, text_color='red')
             validation_error.pack()
-
-        else:
+        finally:
+            # Proceed to create the voucher only if no exceptions were raised
             voucher_data = Voucher(no_adults,no_child,no_senior,no_students,boarding_zone,destination_zone,zones)
             voucher_data.generate_voucher()
     
